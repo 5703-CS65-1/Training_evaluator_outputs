@@ -1,0 +1,13 @@
+# Judge API & schema utilities (used by all stages)
+openai>=1.30
+pydantic>=2.0
+Pillow>=10.0
+tqdm>=4.60
+
+# Stage A backends
+# vLLM offline batch inference for Qwen3-VL family
+# (安装见 evaluation/install_vllm.sh; CUDA 12.x + torch 2.x)
+# vllm>=0.7.0
+# transformers (ArtiMuse 走 transformers 路径)
+# transformers>=4.46
+# torch>=2.4

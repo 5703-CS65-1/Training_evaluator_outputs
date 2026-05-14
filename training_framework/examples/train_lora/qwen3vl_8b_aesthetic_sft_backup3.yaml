@@ -1,0 +1,66 @@
+### model
+model_name_or_path: /root/autodl-fs/models/Qwen3-VL-8B-Thinking
+trust_remote_code: true
+image_max_pixels: 1048576          # ~1024x1024，艺术作品笔触/色彩细节对 faithful 评论是关键
+video_max_pixels: 16384
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 64
+lora_alpha: 128                    # alpha = 2 * rank
+lora_dropout: 0.05
+lora_target: all                   # LM 中所有线性层（Q/K/V/O/MLP）
+use_rslora: true                   # 必开：高 rank LoRA 的稳定缩放（α/√r），论文 +1~2%
+loraplus_lr_ratio: 16              # LoRA+：B 矩阵用 16x lr，加速收敛 + 更优终态
+neftune_noise_alpha: 5             # NEFTune：嵌入层小噪声，小数据 SFT 平均 +5~10%
+freeze_vision_tower: true          # 冻结 ViT：3K 图片不足以再训练，否则破坏视觉表征
+freeze_multi_modal_projector: true # 冻结 projector：保留已对齐的视觉空间
+freeze_language_model: false
+
+### dataset
+dataset: apdd_aesthetic_thinking
+dataset_dir: /root/autodl-fs/code/LLaMA-Factory/data
+media_dir: /root/autodl-fs/5703-training      # 解析 jsonl 中相对图片路径 train_images/xxx
+template: qwen3_vl                            # 保留 <think> 推理段（与训练数据格式一致）
+cutoff_len: 4096                              # 实测最大 ≈ 3021 tokens，4096 余量充足
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+overwrite_cache: false
+
+### output
+output_dir: /root/autodl-fs/output/qwen3vl-8b-aesthetic-lora
+logging_dir: /root/tf-logs/qwen3vl-8b-aesthetic   # tensorboard event 文件
+logging_steps: 5
+logging_first_step: true
+save_strategy: steps
+save_steps: 80
+save_total_limit: 3
+save_only_model: false              # 只存模型，不存 optimizer state，省磁盘
+plot_loss: true
+overwrite_output_dir: true
+report_to: tensorboard
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 16    # 有效 batch = 16
+learning_rate: 1.0e-4              # 配合 LoRA+ 后 B 实际 lr = 1.6e-3
+num_train_epochs: 4.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+weight_decay: 0.0                  # LoRA 不加 wd（避免压缩 B 到 0）
+max_grad_norm: 1.0
+bf16: true
+gradient_checkpointing: true       # A800 80GB 显存，开启 GC 防 OOM（牺牲约 25% 速度换显存）
+flash_attn: sdpa                   # 默认走 PyTorch SDPA；如训练机已装 flash-attn，可改为 fa2
+ddp_timeout: 180000000
+
+### eval
+val_size: 0.03                     # ~90 条 dev，loss 监控信号更稳
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 80                     # 与 save_steps 对齐，保证 best-checkpoint 命中保存点
+load_best_model_at_end: true
+metric_for_best_model: eval_loss
+greater_is_better: false

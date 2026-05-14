@@ -1,0 +1,29 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+
+# Model / adapter weights — too large, not tracked
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+
+# Local outputs / scratch
+evaluation/outputs/
+training_results/train.pid
+
+# Images (license-restricted)
+evaluation/data/eval_images/
+
+# IDE / env
+.venv/
+.idea/
+.vscode/
+
+# Build artifacts inside training_framework
+training_framework/build/
+training_framework/dist/
+training_framework/*.egg-info/

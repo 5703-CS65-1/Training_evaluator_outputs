@@ -1,0 +1,67 @@
+### model
+model_name_or_path: /root/autodl-tmp/models/Qwen3-VL-8B-Thinking
+trust_remote_code: true
+image_max_pixels: 1048576          # ~1024x1024，艺术作品笔触/色彩细节对 faithful 评论是关键
+video_max_pixels: 16384
+
+### method
+# §9 第一优先级配方：先关掉所有"放大器"，找回稳定基线
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 16                      # 64→16：先稳；后续如欠拟合再阶梯升到 32
+lora_alpha: 32                     # 保持 α/r = 2
+lora_dropout: 0.05
+lora_target: all                   # LM 中所有线性层（Q/K/V/O/MLP）
+use_rslora: false                  # 关 rsLoRA：排除 α/√r 对有效 lr 的放大
+# loraplus_lr_ratio:               # 关 LoRA+：B 矩阵 16x lr 是上次发散的元凶
+# neftune_noise_alpha:             # 关 NEFTune：和 LoRA+ 叠加过度扰动；先不用
+freeze_vision_tower: true          # 冻结 ViT
+freeze_multi_modal_projector: true # 冻结 projector
+freeze_language_model: false
+
+### dataset
+dataset: apdd_aesthetic_thinking
+dataset_dir: /root/autodl-fs/code/LLaMA-Factory/data
+media_dir: /root/autodl-fs/data    # 解析 jsonl 中相对图片路径 train_images/xxx
+template: qwen3_vl                 # 保留 <think> 推理段（与训练数据格式一致）
+cutoff_len: 8192                   # 实测最大 ≈ 3021 tokens，4096 余量充足
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+overwrite_cache: true
+
+### output
+output_dir: /root/autodl-fs/output/qwen3vl-8b-aesthetic-lora1
+logging_dir: /root/tf-logs/qwen3vl-8b-aesthetic1
+logging_steps: 5
+logging_first_step: true
+save_strategy: steps
+save_steps: 80                     # 80→40：与 eval_steps 对齐
+save_total_limit: 5
+save_only_model: false
+plot_loss: true
+overwrite_output_dir: true
+report_to: tensorboard
+
+### train
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8    # 有效 batch = 16
+learning_rate: 5.0e-5              # 1e-4 → 5e-5：没有 LoRA+ 放大，主 lr 更保守
+num_train_epochs: 3.0              # 4 → 2：避免在 3K 数据上反复刻字模复读
+lr_scheduler_type: cosine
+warmup_ratio: 0.1                  # 0.05 → 0.1：lr 暖身更充分，规避前 100 步爆点
+weight_decay: 0.0                  # LoRA 不加 wd
+max_grad_norm: 0.5                 # 1.0 → 0.5：多一道兜底，bf16 下更稳
+bf16: true
+gradient_checkpointing: true
+flash_attn: sdpa
+ddp_timeout: 180000000
+
+### eval
+val_size: 0.05                     # 0.03 → 0.05：dev ~150 条，eval_loss 信号更稳
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 80                     # 80 → 40：更密的早停信号；如再爆能在 step 100 内发现
+load_best_model_at_end: true
+metric_for_best_model: eval_loss
+greater_is_better: false

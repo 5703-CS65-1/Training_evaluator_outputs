@@ -1,0 +1,14 @@
+{
+  "num_samples": 499,
+  "num_total_candidate_claims": 4990,
+  "num_total_gold_claims": 5613,
+  "faithful_precision_soft": 0.7932865731462926,
+  "evidence_grounding_score": 0.7091182364729459,
+  "lf_perception": 0.8804402201100551,
+  "lf_cognition": 0.7291582762786951,
+  "lf_emotion": 0.7637795275590551,
+  "claim_recall": 0.8686976661321931,
+  "num_scored": 499,
+  "score_mae": 1.0212004008016045,
+  "score_spearman": 0.5464804057546987
+}

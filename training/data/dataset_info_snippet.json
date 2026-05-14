@@ -1,0 +1,16 @@
+{
+  "apdd_aesthetic_thinking": {
+    "file_name": "/root/autodl-fs/data/sft_train.jsonl",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages",
+      "images": "images"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant"
+    }
+  }
+}

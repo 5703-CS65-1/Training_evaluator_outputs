@@ -1,0 +1,41 @@
+### model
+model_name_or_path: /root/autodl-fs/models/Qwen3-VL-8B-Thinking
+image_max_pixels: 262144
+video_max_pixels: 16384
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 8
+lora_target: all
+
+### dataset
+dataset: mllm_demo
+template: qwen3_vl_nothink
+cutoff_len: 1024
+max_samples: 5
+preprocessing_num_workers: 4
+dataloader_num_workers: 2
+
+### output (写到 autodl-tmp 的高速盘，避免 autodl-fs 慢 I/O 拖慢训练)
+output_dir: /root/autodl-tmp/checkpoints/qwen3vl_8b_lora_smoketest
+logging_steps: 1
+save_steps: 100
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: none
+
+### train (跑 1 epoch，5 条样本，约 5 个 step，目的是验证训练能跑通)
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 1
+learning_rate: 1.0e-4
+num_train_epochs: 1.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.0
+bf16: true
+ddp_timeout: 180000000
+resume_from_checkpoint: null
+gradient_checkpointing: true
