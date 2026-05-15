@@ -40,14 +40,14 @@ MAX_JSON_RETRIES="2"
 # Qwen preset (DashScope intl)
 QWEN_JUDGE_MODEL="qwen3.6-plus"
 QWEN_JUDGE_BASE_URL="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-QWEN_JUDGE_API_KEY="${DASHSCOPE_API_KEY:-sk-b9a5b0dfe90a4856b702bfa8ea6755cb}"
+QWEN_JUDGE_API_KEY=""
 QWEN_JUDGE_WITH_IMAGE="false"
 
 # DeepSeek preset (OpenAI-compatible). model name is pass-through; set to
 # "deepseek-v4" / "deepseek-chat" / "deepseek-reasoner" as desired.
 DEEPSEEK_JUDGE_MODEL="deepseek-reasoner"
 DEEPSEEK_JUDGE_BASE_URL="https://api.deepseek.com/v1"
-DEEPSEEK_JUDGE_API_KEY="sk-6b7f0407358746d88f7059ea4a485222"
+DEEPSEEK_JUDGE_API_KEY=""
 DEEPSEEK_JUDGE_WITH_IMAGE="false"   # deepseek chat/reasoner are text-only
 
 case "$JUDGE_BACKEND" in
